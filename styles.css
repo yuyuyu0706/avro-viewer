@@ -1,0 +1,171 @@
+:root {
+  color-scheme: light;
+  --border: #d9e1ea;
+  --accent: #1769aa;
+  --bg: #f7f9fc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: #1d2733;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+
+h1,
+h2 {
+  margin: 0;
+}
+
+h1 {
+  font-size: 1.2rem;
+}
+
+h2 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.header-controls,
+.header-actions,
+.toolbar,
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#fileInput {
+  display: none;
+}
+
+.file-btn,
+button {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: calc(100vh - 130px);
+}
+
+.sidebar {
+  padding: 1rem;
+  border-right: 1px solid var(--border);
+  background: #fff;
+  overflow: auto;
+}
+
+.main-panel {
+  padding: 1rem;
+  overflow: auto;
+}
+
+.drop-zone {
+  border: 2px dashed var(--accent);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  margin-bottom: 0.8rem;
+  background: #eef7ff;
+}
+
+.drop-zone.drag-over {
+  background: #d7ebff;
+}
+
+.table-wrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: auto;
+  background: #fff;
+  max-height: 50vh;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+  max-width: 280px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+th {
+  background: #f0f4f8;
+  position: sticky;
+  top: 0;
+  cursor: pointer;
+}
+
+tr:hover {
+  background: #f8fbff;
+}
+
+.code-view {
+  max-height: 240px;
+  overflow: auto;
+  background: #0f1720;
+  color: #e9f4ff;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.column-list,
+.filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  background: #fff;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 1000px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
