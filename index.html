@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avro Viewer</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="vendor/avsc.js"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Avro Viewer</h1>
+      <div class="header-controls">
+        <label class="file-btn" for="fileInput">ファイル選択</label>
+        <input id="fileInput" type="file" accept=".avro,application/octet-stream" />
+        <span id="statusText">ファイルを選択してください</span>
+      </div>
+      <div class="header-actions">
+        <label for="previewLimit">先頭表示件数</label>
+        <input id="previewLimit" type="number" min="50" max="5000" step="50" value="200" />
+        <button id="exportJsonBtn" disabled>Export JSON</button>
+        <button id="exportCsvBtn" disabled>Export CSV</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <section>
+          <h2>Schema</h2>
+          <pre id="schemaView" class="code-view">(未読み込み)</pre>
+        </section>
+
+        <section>
+          <h2>Columns</h2>
+          <div id="columnList" class="column-list"></div>
+        </section>
+
+        <section>
+          <h2>Filter (簡易)</h2>
+          <div class="filter-controls">
+            <select id="filterField"></select>
+            <select id="filterOp">
+              <option value="contains">contains</option>
+              <option value="eq">==</option>
+              <option value="exists">exists</option>
+            </select>
+            <input id="filterValue" type="text" placeholder="value" />
+            <button id="applyFilterBtn" disabled>適用</button>
+            <button id="clearFilterBtn" disabled>クリア</button>
+          </div>
+          <small id="filterStatus">フィルタ未適用</small>
+        </section>
+      </aside>
+
+      <section class="main-panel">
+        <div id="dropZone" class="drop-zone">
+          .avro ファイルをドラッグ&ドロップ、または「ファイル選択」
+        </div>
+
+        <div class="toolbar">
+          <input id="searchInput" type="search" placeholder="検索（部分一致）" disabled />
+          <select id="searchField" disabled>
+            <option value="__all__">全フィールド</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <button id="prevPageBtn" disabled>前へ</button>
+          <span id="pageInfo">0 / 0</span>
+          <button id="nextPageBtn" disabled>次へ</button>
+        </div>
+
+        <section>
+          <h2>Row Detail</h2>
+          <pre id="rowDetail" class="code-view">行をクリックするとJSONが表示されます</pre>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      <div id="logArea">ログ:</div>
+    </footer>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
