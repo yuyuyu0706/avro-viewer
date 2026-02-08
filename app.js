@@ -3,6 +3,7 @@ const PAGE_SIZE = 100;
 const state = {
   fileName: "",
   schema: null,
+  allRecords: [],
   rows: [],
   visibleColumns: [],
   filteredRows: [],
@@ -11,6 +12,14 @@ const state = {
   filter: null,
   sort: { field: null, dir: "asc" },
   currentPage: 1,
+};
+
+const profileState = {
+  worker: null,
+  data: null,
+  processing: false,
+  selectedColumn: null,
+  progress: { processed: 0, total: 0 },
 };
 
 const dom = {
@@ -37,6 +46,14 @@ const dom = {
   logArea: document.getElementById("logArea"),
   exportJsonBtn: document.getElementById("exportJsonBtn"),
   exportCsvBtn: document.getElementById("exportCsvBtn"),
+  tabBrowse: document.getElementById("tabBrowse"),
+  tabProfile: document.getElementById("tabProfile"),
+  browsePanel: document.getElementById("browsePanel"),
+  profilePanel: document.getElementById("profilePanel"),
+  profileStatus: document.getElementById("profileStatus"),
+  topKInput: document.getElementById("topKInput"),
+  suspiciousList: document.getElementById("suspiciousList"),
+  profileDetail: document.getElementById("profileDetail"),
 };
 
 function log(message, isError = false) {
@@ -216,8 +233,213 @@ function updateControls(enabled) {
     dom.exportCsvBtn,
     dom.applyFilterBtn,
     dom.clearFilterBtn,
+    dom.topKInput,
   ].forEach((el) => {
     el.disabled = !enabled;
+  });
+}
+
+function setActiveTab(tab) {
+  const isBrowse = tab === "browse";
+  dom.tabBrowse.classList.toggle("active", isBrowse);
+  dom.tabProfile.classList.toggle("active", !isBrowse);
+  dom.browsePanel.classList.toggle("active", isBrowse);
+  dom.profilePanel.classList.toggle("active", !isBrowse);
+}
+
+function formatRate(rate) {
+  if (Number.isNaN(rate)) return "-";
+  return `${(rate * 100).toFixed(1)}%`;
+}
+
+function formatCount(value) {
+  return value?.toLocaleString() ?? "-";
+}
+
+function renderProfileStatus(message) {
+  dom.profileStatus.textContent = message;
+}
+
+function clearProfileView(message) {
+  dom.suspiciousList.textContent = message;
+  dom.profileDetail.textContent = message;
+}
+
+function renderProfileRanking() {
+  const ranking = profileState.data?.suspiciousRanking || [];
+  dom.suspiciousList.innerHTML = "";
+
+  if (!ranking.length) {
+    dom.suspiciousList.textContent = "(ランキングなし)";
+    return;
+  }
+
+  ranking.forEach((item, index) => {
+    const wrap = document.createElement("div");
+    wrap.className = "profile-item";
+    wrap.dataset.column = item.column;
+    if (!profileState.selectedColumn && index === 0) {
+      profileState.selectedColumn = item.column;
+    }
+    if (profileState.selectedColumn === item.column) {
+      wrap.classList.add("active");
+    }
+
+    const title = document.createElement("div");
+    title.textContent = `${item.column} (score ${item.score})`;
+    title.style.fontWeight = "600";
+
+    const reasonList = document.createElement("ul");
+    reasonList.style.margin = "0.35rem 0 0";
+    reasonList.style.paddingLeft = "1.2rem";
+    item.reasons.forEach((reason) => {
+      const li = document.createElement("li");
+      li.textContent = reason.message;
+      reasonList.appendChild(li);
+    });
+
+    wrap.append(title, reasonList);
+    wrap.addEventListener("click", () => {
+      profileState.selectedColumn = item.column;
+      renderProfileRanking();
+      renderProfileDetail();
+    });
+    dom.suspiciousList.appendChild(wrap);
+  });
+}
+
+function renderProfileDetail() {
+  const column = profileState.selectedColumn;
+  const data = profileState.data?.columns?.[column];
+  dom.profileDetail.innerHTML = "";
+
+  if (!column || !data) {
+    dom.profileDetail.textContent = "(列を選択してください)";
+    return;
+  }
+
+  const header = document.createElement("div");
+  header.innerHTML = `<strong>${column}</strong>`;
+
+  const grid = document.createElement("div");
+  grid.className = "profile-grid";
+
+  const cards = [
+    { title: "推定型", value: data.typeHint },
+    { title: "総レコード", value: formatCount(profileState.data.totalRecords) },
+    { title: "NULL件数", value: formatCount(data.nullCount) },
+    { title: "NULL率", value: formatRate(data.nullRate) },
+    { title: "非NULL件数", value: formatCount(data.nonNullCount) },
+  ];
+
+  if (data.min !== undefined && data.max !== undefined) {
+    const minVal = data.minDisplay ?? data.min;
+    const maxVal = data.maxDisplay ?? data.max;
+    cards.push({ title: "min", value: minVal });
+    cards.push({ title: "max", value: maxVal });
+  } else if (data.minMaxReason) {
+    cards.push({ title: "min/max", value: data.minMaxReason });
+  }
+
+  if (data.topKLimited) {
+    cards.push({ title: "TopK注意", value: "ユニーク値が多く精度低下" });
+  }
+
+  cards.forEach((card) => {
+    const box = document.createElement("div");
+    box.className = "profile-card";
+    box.innerHTML = `<h3>${card.title}</h3><div>${card.value}</div>`;
+    grid.appendChild(box);
+  });
+
+  const table = document.createElement("table");
+  table.className = "profile-table";
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>TopK</th>
+        <th>件数</th>
+        <th>割合</th>
+      </tr>
+    </thead>
+  `;
+  const tbody = document.createElement("tbody");
+  if (data.topK?.length) {
+    data.topK.forEach((item) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item.value}</td>
+        <td>${formatCount(item.count)}</td>
+        <td>${formatRate(item.rate)}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  } else {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td colspan="3">TopKなし</td>`;
+    tbody.appendChild(row);
+  }
+  table.appendChild(tbody);
+
+  dom.profileDetail.append(header, grid, table);
+}
+
+function renderProfile() {
+  if (!profileState.data) {
+    clearProfileView("(未解析)");
+    return;
+  }
+  renderProfileRanking();
+  renderProfileDetail();
+}
+
+function stopProfileWorker() {
+  if (profileState.worker) {
+    profileState.worker.terminate();
+    profileState.worker = null;
+  }
+}
+
+function startProfileWorker(records, schema) {
+  stopProfileWorker();
+  profileState.processing = true;
+  profileState.data = null;
+  profileState.selectedColumn = null;
+  profileState.progress = { processed: 0, total: records.length };
+  renderProfileStatus("Profile解析中…");
+  clearProfileView("(解析中)");
+
+  const worker = new Worker(new URL("./workers/profileWorker.js", import.meta.url), { type: "module" });
+  profileState.worker = worker;
+
+  worker.addEventListener("message", (event) => {
+    const { type, payload } = event.data || {};
+    if (type === "PROGRESS") {
+      profileState.progress = payload;
+      renderProfileStatus(`Profile解析中… ${payload.processedRecords.toLocaleString()} / ${payload.totalRecords.toLocaleString()}`);
+      return;
+    }
+    if (type === "RESULT") {
+      profileState.processing = false;
+      profileState.data = payload;
+      renderProfileStatus("Profile解析完了");
+      renderProfile();
+      return;
+    }
+    if (type === "ERROR") {
+      profileState.processing = false;
+      renderProfileStatus("Profile解析失敗");
+      clearProfileView(payload?.message || "Profile解析に失敗しました");
+    }
+  });
+
+  worker.postMessage({
+    type: "START",
+    payload: {
+      records,
+      schema,
+      topK: Number(dom.topKInput.value) || 10,
+    },
   });
 }
 
@@ -256,6 +478,7 @@ function exportCsv() {
 function resetForNewFile(fileName) {
   state.fileName = fileName;
   state.schema = null;
+  state.allRecords = [];
   state.rows = [];
   state.visibleColumns = [];
   state.filteredRows = [];
@@ -268,6 +491,12 @@ function resetForNewFile(fileName) {
   dom.filterValue.value = "";
   dom.filterStatus.textContent = "フィルタ未適用";
   updateControls(false);
+  stopProfileWorker();
+  profileState.data = null;
+  profileState.processing = false;
+  profileState.selectedColumn = null;
+  renderProfileStatus("Profile未実行");
+  clearProfileView("(未解析)");
 }
 
 async function handleFile(file) {
@@ -281,6 +510,7 @@ async function handleFile(file) {
     const { records, schema } = await parseAvroWithAvsc(buffer);
 
     const previewLimit = Number(dom.previewLimit.value) || 200;
+    state.allRecords = records;
     state.rows = records.slice(0, previewLimit);
     state.schema = schema || { note: "schema を取得できませんでした" };
     state.visibleColumns = detectColumns(state.rows);
@@ -296,6 +526,7 @@ async function handleFile(file) {
     updateControls(true);
     dom.statusText.textContent = `${file.name}: ${records.length}件読み込み（表示: ${state.rows.length}件）`;
     log(`読み込み完了: ${records.length}件`);
+    startProfileWorker(state.allRecords, state.schema);
   } catch (error) {
     dom.statusText.textContent = "読み込み失敗";
     dom.schemaView.textContent = "(schemaなし)";
@@ -303,6 +534,8 @@ async function handleFile(file) {
     dom.tableBody.innerHTML = "";
     log(`エラー: ${error.message}`, true);
     alert(`Avroの読み込みに失敗しました: ${error.message}`);
+    renderProfileStatus("Profile解析失敗");
+    clearProfileView(error.message);
   }
 }
 
@@ -372,4 +605,14 @@ dom.nextPageBtn.addEventListener("click", () => {
 dom.exportJsonBtn.addEventListener("click", exportJson);
 dom.exportCsvBtn.addEventListener("click", exportCsv);
 
+dom.tabBrowse.addEventListener("click", () => setActiveTab("browse"));
+dom.tabProfile.addEventListener("click", () => setActiveTab("profile"));
+
+dom.topKInput.addEventListener("change", () => {
+  if (!state.allRecords.length || profileState.processing) return;
+  startProfileWorker(state.allRecords, state.schema);
+});
+
 updateControls(false);
+setActiveTab("browse");
+clearProfileView("(未解析)");

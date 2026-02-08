@@ -88,6 +88,33 @@ button:disabled {
   overflow: auto;
 }
 
+.tab-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tab-button {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+}
+
+.tab-button.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
 .drop-zone {
   border: 2px dashed var(--accent);
   border-radius: 8px;
@@ -154,6 +181,93 @@ tr:hover {
   margin-bottom: 0.5rem;
 }
 
+.profile-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.profile-status {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  background: var(--muted);
+  font-size: 0.85rem;
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 2fr;
+  gap: 1rem;
+}
+
+.profile-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: var(--panel);
+  min-height: 200px;
+}
+
+.profile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.profile-item {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  background: var(--muted);
+}
+
+.profile-item.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(75, 123, 184, 0.2);
+}
+
+.profile-detail {
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+.profile-card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem;
+  background: var(--muted);
+}
+
+.profile-card h3 {
+  margin: 0 0 0.3rem 0;
+  font-size: 0.85rem;
+}
+
+.profile-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.profile-table th,
+.profile-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.3rem 0.4rem;
+  text-align: left;
+}
+
 footer {
   border-top: 1px solid var(--border);
   background: var(--panel);
@@ -169,5 +283,9 @@ footer {
   .sidebar {
     border-right: none;
     border-bottom: 1px solid var(--border);
+  }
+
+  .profile-layout {
+    grid-template-columns: 1fr;
   }
 }
