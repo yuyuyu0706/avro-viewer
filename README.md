@@ -1,4 +1,4 @@
-# Avro Viewer (HTML/CSS/JavaScript)
+# Avro Viewer White
 
 ローカルの `.avro` (Avro OCF) をブラウザだけで読み込み、表形式で確認する静的Webアプリです。
 
