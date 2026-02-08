@@ -33,15 +33,15 @@ python -m http.server 8000
 
 ## 制限事項
 
-- Avroのデコードに CDN 版 `avsc` を利用しています。オフライン利用する場合は `vendor/` にライブラリを同梱してください。
+- Avroのデコードに `vendor/avsc.js` を同梱しています（オフライン利用可）。
 - 大容量ファイル対応として、初期表示は「先頭N件」のみを保持・描画します。
 - ページングは1ページ100件です。
 - 複雑な logicalType の人間可読変換は現状未対応です（値は文字列化して表示）。
 
 ## 依存ライブラリ
 
-- [`avsc` v5.7.7](https://www.npmjs.com/package/avsc) (CDN: jsDelivr)
-  - License: MIT
+- [`avsc` v5.7.7](https://www.npmjs.com/package/avsc) (同梱: `vendor/avsc.js`)
+  - License: MIT (`vendor/avsc-LICENSE.txt`)
 
 ## ファイル構成
 
@@ -49,3 +49,5 @@ python -m http.server 8000
 - `styles.css`
 - `app.js`
 - `README.md`
+- `vendor/avsc.js`
+- `vendor/avsc-LICENSE.txt`
