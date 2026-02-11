@@ -54,34 +54,60 @@
       </aside>
 
       <section class="main-panel">
-        <div id="dropZone" class="drop-zone">
-          .avro ファイルをドラッグ&ドロップ、または「ファイル選択」
+        <div class="tab-bar">
+          <button id="tabBrowse" class="tab-button active" type="button">Browse</button>
+          <button id="tabProfile" class="tab-button" type="button">Profile</button>
         </div>
 
-        <div class="toolbar">
-          <input id="searchInput" type="search" placeholder="検索（部分一致）" disabled />
-          <select id="searchField" disabled>
-            <option value="__all__">全フィールド</option>
-          </select>
+        <div id="browsePanel" class="tab-panel active">
+          <div id="dropZone" class="drop-zone">
+            .avro ファイルをドラッグ&ドロップ、または「ファイル選択」
+          </div>
+
+          <div class="toolbar">
+            <input id="searchInput" type="search" placeholder="検索（部分一致）" disabled />
+            <select id="searchField" disabled>
+              <option value="__all__">全フィールド</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead id="tableHead"></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="pagination">
+            <button id="prevPageBtn" disabled>前へ</button>
+            <span id="pageInfo">0 / 0</span>
+            <button id="nextPageBtn" disabled>次へ</button>
+          </div>
+
+          <section>
+            <h2>Row Detail</h2>
+            <pre id="rowDetail" class="code-view">行をクリックするとJSONが表示されます</pre>
+          </section>
         </div>
 
-        <div class="table-wrap">
-          <table>
-            <thead id="tableHead"></thead>
-            <tbody id="tableBody"></tbody>
-          </table>
-        </div>
+        <div id="profilePanel" class="tab-panel">
+          <div class="profile-toolbar">
+            <div id="profileStatus" class="profile-status">Profile未実行</div>
+            <label for="topKInput">TopK</label>
+            <input id="topKInput" type="number" min="1" max="50" value="10" />
+          </div>
 
-        <div class="pagination">
-          <button id="prevPageBtn" disabled>前へ</button>
-          <span id="pageInfo">0 / 0</span>
-          <button id="nextPageBtn" disabled>次へ</button>
+          <div class="profile-layout">
+            <section class="profile-panel">
+              <h2>怪しい列ランキング</h2>
+              <div id="suspiciousList" class="profile-list">(未解析)</div>
+            </section>
+            <section class="profile-panel">
+              <h2>列プロファイル</h2>
+              <div id="profileDetail" class="profile-detail">(未解析)</div>
+            </section>
+          </div>
         </div>
-
-        <section>
-          <h2>Row Detail</h2>
-          <pre id="rowDetail" class="code-view">行をクリックするとJSONが表示されます</pre>
-        </section>
       </section>
     </main>
 
